@@ -37,13 +37,13 @@ Computes the incident (background) electric field for a **homogeneous** Domain o
 
 **File:** `Forward_solvers/generate_scattered_field.mlx`
 
-Computes both the incident field and the total field (DOI with embedded target) on a **new, independent mesh**. The scattered field is formed as:
+Computes both the incident field and the total field (DOI with embedded target). The scattered field is formed as:
 
 ```
 Es = Et − Ei
 ```
 
-Using a different mesh from Step 1 is essential to avoid the **inverse crime** — reusing the same discretisation for data generation and reconstruction produces artificially perfect results that do not reflect real experimental conditions. Results are saved to `results/scattered_fields.mat` and `results/geometry_sf.mat`.
+Results are saved to `results/scattered_fields.mat` and `results/geometry_sf.mat`.
 
 ---
 
