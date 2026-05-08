@@ -1,6 +1,6 @@
 # OSMI — Open-Source Microwave Imaging
 
-A MATLAB framework for 2-D microwave imaging. OSMI provides a complete pipeline for forward electromagnetic (EM) simulations and microwave imaging (MWI) reconstructions.
+A framework for 2-D microwave imaging. OSMI provides a complete pipeline for forward electromagnetic (EM) simulations and microwave imaging (MWI) reconstructions.
 ---
 
 ## Repository structure
