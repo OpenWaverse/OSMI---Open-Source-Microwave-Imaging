@@ -24,7 +24,7 @@ function plotGeometry(model)
 figure;
 pdegplot(model,...
     'FaceLabels','on',...
-    'EdgeLabels','on');
+    'EdgeLabels','off');
 
 axis equal;
 grid on;

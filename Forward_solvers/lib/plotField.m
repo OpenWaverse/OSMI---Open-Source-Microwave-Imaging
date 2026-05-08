@@ -1,4 +1,4 @@
-function plotField(mesh, fieldData, plotTitle)
+function plotField(scenario, fieldData, plotTitle, unitsLabel)
 % PLOTFIELD  Plot a scalar field (e.g. electric field) on the FEM mesh.
 %
 %   plotField(mesh, fieldData, plotTitle)
@@ -29,6 +29,7 @@ function plotField(mesh, fieldData, plotTitle)
 %
 %   See also PLOTPERMITTIVITY, PLOTMESH, FINDPROBENODES
 
+mesh = scenario.mesh;
 p = mesh.Nodes;
 t = mesh.Elements';
 
@@ -43,9 +44,17 @@ trisurf(...
     fieldData,...
     'EdgeColor','none');
 
+h = pdegplot(scenario.model,...
+    'FaceLabels','off',...
+    'EdgeLabels','off');
+
+set(h,'Color','w','LineWidth',1.5);
+
 view(2);
 axis equal;
-colorbar;
+
+cb = colorbar;
+cb.Label.String = unitsLabel;
 
 title(plotTitle);
 
