@@ -1,7 +1,6 @@
 # OSMI — Open-Source Microwave Imaging
 
-A MATLAB framework for 2-D microwave imaging. OSMI provides a complete pipeline from forward field simulation to image reconstruction, built around a finite-element forward solver and a Born-approximation / TSVD inverse solver.
-
+A MATLAB framework for 2-D microwave imaging. OSMI provides a complete pipeline for forward electromagnetic (EM) simulations and microwave imaging (MWI) reconstructions.
 ---
 
 ## Repository structure
@@ -10,14 +9,14 @@ A MATLAB framework for 2-D microwave imaging. OSMI provides a complete pipeline 
 OSMI---Open-Source-Microwave-Imaging/
 │
 ├── Forward_solvers/
-│   ├── lib/                        # Support functions (mesh, permittivity, plotting)
-│   ├── generate_background_field.mlx   # Step 1 – background (incident) field
-│   ├── generate_scattered_field.mlx    # Step 2 – scattered field
-│   └── results/                    # Output .mat files (created on first run)
+│   ├── lib/
+│   ├── generate_background_field.mlx
+│   ├── generate_scattered_field.mlx
+│   └── results/
 │
 └── Imaging/
     └── Born_aproximation_TSVD/
-        └── imaging.mlx             # Step 3 – image reconstruction
+        └── imaging.mlx
 ```
 
 ---
