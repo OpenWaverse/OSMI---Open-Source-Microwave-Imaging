@@ -23,7 +23,7 @@ function perm = assignPermittivity(...
 %                  geom.targetRadius   — radius of the target circle (m).
 %
 %   materials  : Struct with one sub-struct per region, each containing a
-%                field 'epsc' (complex relative permittivity εr + σ/(jωε0)):
+%                field 'epsc' (complex relative permittivity εr − jσ/(ωε0)):
 %                  materials.background.epsc — background medium.
 %                  materials.doi.epsc        — coupling/immersion medium
 %                                              inside DOI, excluding target.
@@ -33,8 +33,8 @@ function perm = assignPermittivity(...
 %   ------
 %   perm       : Struct with fields:
 %                  perm.complex — nElem-by-1 complex permittivity vector.
-%                  perm.real    — real part of perm.complex (εr).
-%                  perm.imag    — imaginary part of perm.complex (loss term).
+%                  perm.real    — real part of perm.complex (ε').
+%                  perm.imag    — imaginary part of perm.complex (= −σ/(ωε0) ≤ 0).
 %
 %   Region assignment logic
 %   -----------------------
@@ -54,21 +54,26 @@ y = centroids(:,2);
 
 rDOI = sqrt(x.^2 + y.^2);
 
-rTarget = sqrt( ...
-    (x - geom.targetCenter(1)).^2 + ...
-    (y - geom.targetCenter(2)).^2);
-
 perm.complex = zeros(size(x));
 
-%% Regions
-insideTarget = rTarget <= geom.targetRadius;
+%% Regions (the target is optional)
+hasTarget = isfield(geom, 'targetRadius') && ~isempty(geom.targetRadius) ...
+            && geom.targetRadius > 0 && isfield(materials, 'target');
+if hasTarget
+    rTarget = sqrt((x - geom.targetCenter(1)).^2 + (y - geom.targetCenter(2)).^2);
+    insideTarget = rTarget <= geom.targetRadius;
+else
+    insideTarget = false(size(x));
+end
 insideDOI    = (rDOI <= geom.doiRadius) & (~insideTarget);
 outsideDOI   = rDOI > geom.doiRadius;
 
 %% Assign Materials
 perm.complex(outsideDOI) = materials.background.epsc;
 perm.complex(insideDOI)  = materials.doi.epsc;
-perm.complex(insideTarget) = materials.target.epsc;
+if hasTarget
+    perm.complex(insideTarget) = materials.target.epsc;
+end
 
 perm.real = real(perm.complex);
 perm.imag = imag(perm.complex);

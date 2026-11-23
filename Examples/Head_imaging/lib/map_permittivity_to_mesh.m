@@ -3,7 +3,7 @@ function perm = map_permittivity_to_mesh( ...
 % MAP_PERMITTIVITY_TO_MESH  Interpolate a pixel-level permittivity map onto
 %                           FEM mesh cells by nearest-neighbour lookup.
 %
-%   perm_cells = map_permittivity_to_mesh(A_perm, verts, cells, ...
+%   perm = map_permittivity_to_mesh(A_perm, verts, cells, ...
 %                    resolution, idx_cells_DoI, perm_bg)
 %
 %   Each triangular cell centroid is mapped to the nearest pixel of A_perm.
@@ -15,7 +15,7 @@ function perm = map_permittivity_to_mesh( ...
 %   Inputs
 %   ------
 %   A_perm         : 2-D complex permittivity map (Ny x Nx), e.g. the output
-%                    of compute_dielectric_maps after permute([2 1 3]).
+%                    perm.complex returned by compute_dielectric_maps.
 %
 %   verts          : (N x 2) or (N x 3) matrix of mesh vertex coordinates [m].
 %                    Only the first two columns (x, y) are used.
@@ -34,8 +34,10 @@ function perm = map_permittivity_to_mesh( ...
 %
 %   Output
 %   ------
-%   perm_cells     : (M x 1) complex vector of per-cell relative permittivity
-%                    values, ready to pass as argument 3 of fem2d.
+%   perm           : struct with fields
+%                      .complex  (M x 1) per-cell complex relative
+%                                permittivity (argument 3 of fem2d)
+%                      .real, .imag  its real and imaginary parts
 %
 %   See also COMPUTE_DIELECTRIC_MAPS
 

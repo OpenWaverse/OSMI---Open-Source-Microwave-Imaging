@@ -3,16 +3,15 @@ function perm = ...
 % COMPUTE_DIELECTRIC_MAPS  Build a 2-D complex permittivity map from MRI tissue
 %                          labels using the 4-Cole-Cole model (Gabriel 1996).
 %
-%   eps_map = compute_dielectric_maps(labels, freq)
-%   eps_map = compute_dielectric_maps(labels, freq, 'verbose', false)
+%   perm = compute_dielectric_maps(labels, freq)
+%   perm = compute_dielectric_maps(labels, freq, 'verbose', false)
 %
-%   Returns a 2-D matrix of complex relative permittivity values, one entry
-%   per pixel of the input label image.  The imaginary part is negative
-%   (lossy convention):
+%   Returns the complex relative permittivity of every pixel of the label
+%   image. With the exp(+j*omega*t) convention used throughout OSMI
 %
-%     eps*(r) = eps'(r)  +  j * eps''(r)
+%     eps_c(r) = eps'(r) - j * eps''(r),     eps'' >= 0,
 %
-%   where eps'' < 0 encodes conductivity losses.
+%   so imag(eps_c) = -eps'' <= 0 encodes the losses.
 %
 %   Inputs
 %   ------
@@ -38,15 +37,16 @@ function perm = ...
 %
 %   Output
 %   ------
-%   eps_complex_map : 2-D matrix (same size as labels) of complex relative
-%                     permittivity values.  Pass to map_permittivity_to_mesh
-%                     to obtain cell-wise values on the FEM mesh.
+%   perm : struct with fields .complex, .real, .imag, each a 2-D matrix
+%          (transposed w.r.t. labels, i.e. permute(...,[2 1])). Pass
+%          perm.complex to map_permittivity_to_mesh to obtain cell-wise
+%          values on the FEM mesh.
 %
 %   Model
 %   -----
-%   eps*(omega) = eps_inf
-%               + sum_n { Delta_n / [1 + (j*omega*tau_n)^(1-alpha_n)] }
-%               - j * sigma / (omega * eps0)
+%   eps_c(omega) = eps_inf
+%                + sum_{n=1..4} Delta_n / [1 + (j*omega*tau_n)^(1-alpha_n)]
+%                - j * sigma_i / (omega * eps0)
 %
 %   Reference
 %   ---------

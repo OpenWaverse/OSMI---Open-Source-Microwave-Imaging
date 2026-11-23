@@ -1,0 +1,15 @@
+# Generated simulation results (re-create with the example scripts)
+**/results/
+
+# MATLAB
+*.asv
+*.autosave
+*.mex*
+slprj/
+codegen/
+*~
+
+# OS / tools
+.DS_Store
+Thumbs.db
+.claude/

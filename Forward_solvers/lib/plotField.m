@@ -1,61 +1,110 @@
-function plotField(scenario, fieldData, plotTitle, unitsLabel)
-% PLOTFIELD  Plot a scalar field (e.g. electric field) on the FEM mesh.
+function ax = plotField(fields, tx, quantity, varargin)
+% PLOTFIELD  Plot the field radiated by transmitter TX on the mesh.
 %
-%   plotField(mesh, fieldData, plotTitle)
+%   plotField(fields, tx)                       |E_z| of transmitter tx
+%   plotField(fields, tx, quantity)             'abs' | 'dB' | 'phase' | 'real' | 'imag'
+%   plotField(..., 'CLim', [cmin cmax])         colour limits (e.g. [-40 0] for 'dB');
+%                                               values outside are saturated
+%   plotField(..., 'Reference', ref)            plot E_fields - E_ref (same mesh),
+%                                               e.g. scattered = total - incident
+%   plotField(..., 'Limits', [x1 x2 y1 y2])     axis limits (m); default: the
+%                                               physical region inside the PML
+%   plotField(..., 'Title', str)                custom title (LaTeX)
+%   plotField(..., 'Overlay', polylines)        cell array of K-by-2 curves to draw
+%   plotField(..., 'Parent', ax)                draw into existing axes
 %
-%   Renders a colour map of a node-wise scalar field over the triangular
-%   mesh using trisurf viewed from above. Intended for visualising FEM
-%   solution quantities such as the magnitude or phase of the electric field,
-%   incident field, or scattered field at each node.
+%   'dB' is 20*log10(|E|/max|E|), so 0 dB is the maximum of the plotted map.
+%   The DOI boundary (if fields.geom is present) and the antennas are drawn
+%   on top; the active transmitter is marked in red.
 %
-%   Inputs
-%   ------
-%   mesh       : Mesh object (e.g. scenario.mesh). Must contain the fields
-%                  mesh.Nodes    — 2-by-N matrix of (x, y) node coordinates.
-%                  mesh.Elements — 3-by-nElem matrix of node connectivity
-%                                  (linear triangular elements).
-%
-%   fieldData  : 1-by-N (or N-by-1) real-valued vector, one value per mesh
-%                node. If the field is complex, pass abs(fieldData) or
-%                angle(fieldData) depending on what you want to visualise.
-%
-%   plotTitle  : Character string used as the figure title (e.g.
-%                '|E| – Incident Field').
-%
-%   Example
-%   -------
-%   u = solvepde(model);
-%   plotField(scenario.mesh, abs(u.NodalSolution), '|E| total field');
-%
-%   See also PLOTPERMITTIVITY, PLOTMESH, FINDPROBENODES
+%   See also FIELD_QUANTITY, FIELDVIEWER, PLOTPERMITTIVITY
 
-mesh = scenario.mesh;
-p = mesh.Nodes;
-t = mesh.Elements';
+if nargin < 3 || isempty(quantity), quantity = 'abs'; end
 
-figure;
-hold on;
+p = inputParser;
+addParameter(p, 'CLim',      []);
+addParameter(p, 'Reference', []);
+addParameter(p, 'Limits',    []);
+addParameter(p, 'Title',     "");
+addParameter(p, 'Overlay',   {});
+addParameter(p, 'Parent',    []);
+parse(p, varargin{:});
+o = p.Results;
 
-trisurf(...
-    t,...
-    p(1,:),...
-    p(2,:),...
-    zeros(size(p(1,:))),...
-    fieldData,...
-    'EdgeColor','none');
+[values, label, units] = field_quantity(fields, tx, quantity, o.Reference);
 
-h = pdegplot(scenario.model,...
-    'FaceLabels','off',...
-    'EdgeLabels','off');
+if isempty(o.Parent)
+    figure;
+    ax = gca;
+else
+    ax = o.Parent;
+    cla(ax);
+end
 
-set(h,'Color','w','LineWidth',1.5);
+patch(ax, 'Faces', fields.mesh.cells, 'Vertices', fields.mesh.verts, ...
+      'FaceVertexCData', values, 'FaceColor', 'flat', 'EdgeColor', 'none');
+hold(ax, 'on');
+drawOverlay(ax, fields, tx, o.Overlay);
+hold(ax, 'off');
 
-view(2);
-axis equal;
+axis(ax, 'equal');
+lim = o.Limits;
+if isempty(lim) && isfield(fields, 'domain')
+    lim = fields.domain.plotLimits;           % physical region, PML hidden
+end
+if ~isempty(lim)
+    xlim(ax, lim(1:2)); ylim(ax, lim(3:4));
+else
+    axis(ax, 'tight');
+end
 
-cb = colorbar;
-cb.Label.String = unitsLabel;
+if ~isempty(o.CLim)
+    if numel(o.CLim) ~= 2 || o.CLim(1) >= o.CLim(2)
+        error('plotField:CLim', 'CLim must be [cmin cmax] with cmin < cmax.');
+    end
+    clim(ax, o.CLim);
+else
+    clim(ax, 'auto');
+end
 
-title(plotTitle);
+cb = colorbar(ax);
+cb.Label.String = units;
+cb.Label.Interpreter = get(groot, 'defaultTextInterpreter');   % follows set_latex_figures
+xlabel(ax, '$x$ (m)');
+ylabel(ax, '$y$ (m)');
 
+if strlength(string(o.Title)) > 0
+    title(ax, o.Title);
+else
+    name = latex_text(fields.name);
+    if ~isempty(o.Reference), name = name + " $-$ " + latex_text(o.Reference.name); end
+    title(ax, sprintf('%s, Tx %d \\quad [%s]', label, tx, name));
+end
+
+end
+
+% -------------------------------------------------------------------------
+function drawOverlay(ax, fields, tx, overlay)
+t = linspace(0, 2*pi, 200);
+g = struct();
+if isfield(fields, 'geom'), g = fields.geom; end
+% DOI circle (circular scenarios)
+if isfield(g, 'doiRadius')
+    r = g.doiRadius;
+    plot(ax, r*cos(t), r*sin(t), 'w-', 'LineWidth', 1);
+end
+% user curves (e.g. tissue boundaries)
+for k = 1:numel(overlay)
+    plot(ax, overlay{k}(:,1), overlay{k}(:,2), 'k-', 'LineWidth', 0.5);
+end
+% target outline, dashed (only if the target is present in this simulation)
+if isfield(fields, 'includeTarget') && fields.includeTarget && ...
+        isfield(g, 'targetRadius') && ~isempty(g.targetRadius) && g.targetRadius > 0
+    plot(ax, g.targetCenter(1) + g.targetRadius*cos(t), ...
+             g.targetCenter(2) + g.targetRadius*sin(t), 'w--', 'LineWidth', 1.5);
+end
+% antennas
+ant = fields.mesh.verts(fields.mesh.probeNodes, :);
+plot(ax, ant(:,1), ant(:,2), 'wo', 'MarkerFaceColor', 'k', 'MarkerSize', 4);
+plot(ax, ant(tx,1), ant(tx,2), 'wo', 'MarkerFaceColor', 'r', 'MarkerSize', 7);
 end

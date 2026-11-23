@@ -1,34 +1,46 @@
-function plotGeometry(model)
-% PLOTGEOMETRY  Visualise the PDE model geometry with face and edge labels.
+function plotGeometry(scenario)
+% PLOTGEOMETRY  Plot the scenario geometry with face labels and the PML.
 %
-%   plotGeometry(model)
+%   plotGeometry(scenario)     scenario returned by GENERATE_FIELDS /
+%                              CREATESCENARIOMESH; the whole square is shown
+%                              and the start of the PML is drawn dashed
+%   plotGeometry(model)        PDEModel only (no PML outline)
 %
-%   Opens a new figure and calls pdegplot to render the 2-D geometry stored
-%   in the PDE model object. Face (region) labels and edge labels are both
-%   shown, which is useful for verifying that regions and boundaries were
-%   built correctly before meshing.
+%   Face labels help to check that the regions (background, DOI, target,
+%   antennas) were built correctly.
 %
-%   Input
-%   -----
-%   model : PDEModel object created by createpde() and populated with
-%           geometry via geometryFromEdges(). Typically obtained from the
-%           'model' field of the struct returned by createScenarioMesh.
-%
-%   Example
-%   -------
-%   scenario = createScenarioMesh(geom, meshControl);
-%   plotGeometry(scenario.model);
-%
-%   See also CREATESCENARIOMESH, PLOTMESH, PDEGPLOT
+%   See also PLOTMESH, CREATESCENARIOMESH, COMPUTEDOMAIN
+
+[model, domain] = unpack(scenario);
 
 figure;
-pdegplot(model,...
-    'FaceLabels','on',...
-    'EdgeLabels','off');
-
+pdegplot(model, 'FaceLabels', 'on', 'EdgeLabels', 'off');
+hold on;
+drawPML(domain);
+hold off;
 axis equal;
 grid on;
+xlabel('$x$ (m)');
+ylabel('$y$ (m)');
+title('Geometry, face labels and PML');
 
-title('Geometry and Face Labels');
+end
 
+% -------------------------------------------------------------------------
+function [model, domain] = unpack(s)
+domain = [];
+if isstruct(s)
+    model = s.model;
+    if isfield(s, 'domain'), domain = s.domain; end
+else
+    model = s;
+end
+end
+
+function drawPML(domain)
+if isempty(domain), return; end
+s = domain.pmlStart;
+plot([-s s s -s -s], [-s -s s s -s], 'r--', 'LineWidth', 1);
+text(0, -s - domain.pml.thickness/2, 'PML', 'Color', 'r', ...
+     'HorizontalAlignment', 'center');
 end

@@ -1,33 +1,40 @@
-function plotMesh(model)
-% PLOTMESH  Display the finite-element mesh of a PDE model.
+function plotMesh(scenario)
+% PLOTMESH  Display the finite-element mesh, with the start of the PML.
 %
-%   plotMesh(model)
+%   plotMesh(scenario)     scenario returned by GENERATE_FIELDS /
+%                          CREATESCENARIOMESH (PML drawn dashed in red)
+%   plotMesh(model)        PDEModel only
+%   plotMesh(fields)       FIELDS struct (e.g. a pre-built mesh without a
+%                          PDE model, as in the head example)
 %
-%   Opens a new figure and draws the triangular FEM mesh stored in the PDE
-%   model object using pdemesh. Useful for inspecting mesh density, element
-%   size transitions between regions (background, DOI, target, antennas),
-%   and overall mesh quality before running the forward solver.
+%   Useful to inspect the element size in each region (background, DOI,
+%   target, antennas) and inside the PML before running the solver.
 %
-%   Input
-%   -----
-%   model : PDEModel object that already has a mesh generated (i.e.
-%           generateMesh has been called on it). Typically obtained from the
-%           'model' field of the struct returned by createScenarioMesh.
-%
-%   Example
-%   -------
-%   scenario = createScenarioMesh(geom, meshControl);
-%   plotMesh(scenario.model);
-%
-%   See also CREATESCENARIOMESH, PLOTGEOMETRY, PDEMESH
+%   See also PLOTGEOMETRY, CREATESCENARIOMESH, PDEMESH
 
+domain = [];
 figure;
+if isstruct(scenario) && isfield(scenario, 'model')
+    pdemesh(scenario.model);
+    if isfield(scenario, 'domain'), domain = scenario.domain; end
+elseif isstruct(scenario) && isfield(scenario, 'mesh') && isfield(scenario.mesh, 'verts')
+    v = scenario.mesh.verts;
+    triplot(scenario.mesh.cells, v(:,1), v(:,2), 'Color', [0 0.45 0.74], 'LineWidth', 0.25);
+    if isfield(scenario, 'domain'), domain = scenario.domain; end
+else
+    pdemesh(scenario);
+end
 
-pdemesh(model);
-
+if ~isempty(domain)
+    hold on;
+    s = domain.pmlStart;
+    plot([-s s s -s -s], [-s -s s s -s], 'r--', 'LineWidth', 1.5);
+    hold off;
+end
 axis equal;
 grid on;
-
-title('FEM Mesh');
+xlabel('$x$ (m)');
+ylabel('$y$ (m)');
+if isempty(domain), title('FEM mesh'); else, title('FEM mesh and PML'); end
 
 end

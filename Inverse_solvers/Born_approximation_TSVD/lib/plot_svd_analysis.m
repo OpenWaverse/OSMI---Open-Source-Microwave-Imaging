@@ -36,7 +36,7 @@ function plot_svd_analysis(S)
     ylim([0 100]);
 
     xlabel('Number of Singular Values');
-    ylabel('Cumulative Energy (%)');
+    ylabel('Cumulative Energy (\%)');
     title('Cumulative Energy Content');
 
 end

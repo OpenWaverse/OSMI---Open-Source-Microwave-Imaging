@@ -1,0 +1,5 @@
+* text=auto
+*.p    binary
+*.mlx  binary
+*.mat  binary
+*.msh  text eol=lf
