@@ -60,8 +60,7 @@ OSMI---Open-Source-Microwave-Imaging/
 **Library** folders (`Forward_solvers`, `Inverse_solvers`) contain only reusable
 functions. **Examples** are live scripts (`.mlx`, with explanations and
 equations) that define a scenario, call the library, and store their outputs
-in `Examples/<name>/results/` (ignored by git; regenerate them by running the
-scripts).
+in `Examples/<name>/results/`
 
 ---
 
@@ -70,9 +69,9 @@ scripts).
 The circular examples build on each other:
 
 1. `Examples/Circular_domain/main_generate_fields.mlx`: fields radiated by
-   each antenna into a homogeneous circular DOI (no target).
+   each antenna into a homogeneous circular DOI.
 2. `Examples/Circular_domain_target/main_generate_fields.mlx`: the same
-   domain with a circular target inclusion.
+   domain with a circular target inclusion (with different dielectric properties with respect to the background medium).
 3. `Examples/Circular_scattered_field/`:
    * `main_generate_fields.mlx`: incident (`incident`), total (`total`) and
      scattered field $E_{sc}=E_{tot}-E_{inc}$, plus the imaging operator
@@ -83,7 +82,7 @@ Two more forward examples show that any mesh can be used:
 
 4. `Examples/Head_imaging/`: MRI-based head (Aubert-Broche et al., IEEE TMI
    2006) on an external structured mesh (two triangles per 0.5 mm pixel),
-   healthy and with a haemorrhagic stroke.
+   healthy and with a hemorrhagic stroke.
 5. `Examples/Gmsh_circular_domain_target/`: the scenario of example 2 meshed
    with [Gmsh](https://gmsh.info) (`generate_meshes.py`), read with
    `readGmshMesh`, permittivity assigned by physical group. Two meshes: one
@@ -109,11 +108,11 @@ The FEM solves for $E_z$ at the nodes (`Everts`, Nv × Nant); `Ecells`
 (Nc × Nant) is the mean of the three node values, i.e. the field at each
 triangle centroid; `Eprobes` (Nant × Nant) is the field at the antennas.
 
-Every example calls `setup_osmi` itself, so no manual `addpath` is needed.
+Every example calls `setup_osmi` itself in order to automatically set the needed paths.
 
 ### Named simulations
 
-Each forward run is one scenario saved under a name you choose:
+Each forward run is one scenario saved under a given name:
 
 ```matlab
 opts.name = "target";  opts.includeTarget = true;
@@ -132,17 +131,11 @@ reference = load_fields("incident");
 ```
 
 Fields of any transmitter can be plotted with `plotField(fields, tx, 'abs')`
-(add `'Reference', ref` for the scattered/differential field and
-`'CLim', [min max]` to fix the colour range, e.g. `[-40 0]` for `'dB'`) or
-browsed with `fieldViewer(state, reference)`, which has Min/Max boxes for the
-colour range (remembered per quantity).
 
 ### Figures
 
 `setup_osmi` calls `set_latex_figures`, so every figure uses the LaTeX
-interpreter (titles, labels, ticks, colour bars, legends). Write math as
-`'$|E_z|$'` and escape `_ % & #` in plain text (`latex_text` does it for you).
-`set_latex_figures(false)` restores MATLAB's default.
+interpreter (titles, labels, ticks, colour bars, legends).
 
 ---
 
@@ -171,7 +164,7 @@ $$
 with linear triangular elements and a polynomial PML (Perfectly Matched Layer). In a homogeneous medium its solution is
 $E_z = -\tfrac{\omega\mu_0 I}{4} H_0^{(2)}(k\,|\mathbf r-\mathbf r_n|)$.
 
-### Computational domain and PML (automatic)
+### Computational domain
 
 The user defines only the physical geometry (DOI, antennas, targets). The
 outer square and the PML are sized from it (`computeDomain`):
@@ -180,16 +173,7 @@ outer square and the PML are sized from it (`computeDomain`):
 2. square side $L = 4a$;
 3. PML = outer 25 % of the half-size: it starts at $s = 0.75\,L/2 = 1.5\,a$ and is $0.5\,a$ thick, leaving a clearance of $0.5\,a$ to the antennas.
 
-Change the proportions with `opts.pml.squareFactor` (default 4) and
-`opts.pml.pmlFraction` (default 0.25); `.R`, `.n`, `.kappaMax` set the PML
-profile. An error is raised if the PML would overlap the geometry, and a
-warning if it is thinner than half a background wavelength. Field and
-permittivity plots show the whole region except the PML by default; geometry
-and mesh plots draw the PML boundary.
-
-`generate_fields` builds the mesh of one scenario, assigns the materials
-(`opts.includeTarget = false` gives the target region the DOI material), solves
-for every transmitter and saves a single `fields` struct in `results/<name>.mat`:
+`generate_fields` builds the mesh of one scenario, assigns the materials (`opts.includeTarget = false` gives the target region the DOI material), solves for every transmitter and saves a single `fields` struct in `results/<name>.mat`:
 
 | Field | Content |
 |---|---|
@@ -201,8 +185,7 @@ for every transmitter and saves a single `fields` struct in `results/<name>.mat`
 | `Eprobes` | $E_z$ at the antennas (row = receiver, column = transmitter) |
 | `geom`, `materials`, `meshControl` | scenario definition (when made by `generate_fields`) |
 
-To avoid the *inverse crime*, simulate the operator and the data on different
-meshes (as the default example does).
+To avoid the *inverse crime*, simulate the operator and the data on different meshes (as the default example does).
 
 ---
 
