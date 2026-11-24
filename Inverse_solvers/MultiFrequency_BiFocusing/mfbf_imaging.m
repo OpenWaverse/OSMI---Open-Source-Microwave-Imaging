@@ -58,7 +58,6 @@ I_mf  = zeros(numel(y_vec), numel(x_vec));
 %% Per-frequency bi-focusing
 for fi = 1:Nf
     D = squeeze(DeltaS(:,:,fi));
-    D = D - diag(diag(D));                       % drop monostatic terms
 
     k_b = 2*pi*freq_vec(fi)*sqrt(eps_r_bg)/c0;   % background wavenumber
     I_f = zeros(numel(y_vec), numel(x_vec));
