@@ -152,7 +152,7 @@ interpreter (titles, labels, ticks, colour bars, legends). Write math as
 |---|---|
 | Time dependence | $e^{+j\omega t}$ |
 | Complex permittivity | $\varepsilon_r = \varepsilon' - j\varepsilon''$, with $\varepsilon'' = \sigma/(\omega\varepsilon_0) \ge 0$ |
-| Polarisation | TM$_z$: scalar field $E_z(x,y)$ |
+| Polarisation | $TM_z$: scalar field $E_z(x,y)$ |
 | Antennas | Line sources of current $I$ |
 | Contrast | $\Delta\varepsilon_r = \varepsilon_r - \varepsilon_{r,b}$ (object minus background) |
 | Field matrices | `E(m, n)`: row = receiver $m$, column = transmitter $n$ |
