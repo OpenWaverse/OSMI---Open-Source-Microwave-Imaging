@@ -157,12 +157,12 @@ interpreter (titles, labels, ticks, colour bars, legends).
 `fem2d` solves, for each transmitter $n$ located at $\mathbf r_n$,
 
 $$
-\nabla^2 E_z + k_0^2\,\varepsilon_r(\mathbf r)\,E_z = j\omega\mu_0 I\,\delta(\mathbf r-\mathbf r_n),
+\nabla^2 E_z + k_0^2\varepsilon_r(\mathbf r)E_z = j\omega\mu_0 I\delta(\mathbf r-\mathbf r_n),
 \qquad k_0=\omega\sqrt{\mu_0\varepsilon_0},
 $$
 
 with linear triangular elements and a polynomial PML (Perfectly Matched Layer). In a homogeneous medium its solution is
-$E_z = -\tfrac{\omega\mu_0 I}{4} H_0^{(2)}(k\,|\mathbf r-\mathbf r_n|)$.
+$E_z = -\tfrac{\omega\mu_0 I}{4} H_0^{(2)}(k|\mathbf r-\mathbf r_n|)$.
 
 ### Computational domain
 
@@ -171,7 +171,7 @@ outer square and the PML are sized from it (`computeDomain`):
 
 1. maximum radius of the geometry in $x$ and $y$: $a=\max(|x_{min}|,|x_{max}|,|y_{min}|,|y_{max}|)$, antenna discs included;
 2. square side $L = 4a$;
-3. PML = outer 25 % of the half-size: it starts at $s = 0.75\,L/2 = 1.5\,a$ and is $0.5\,a$ thick, leaving a clearance of $0.5\,a$ to the antennas.
+3. PML = outer 25 % of the half-size: it starts at $s = 0.75, L/2 = 1.5 a$ and is $0.5 a$ thick, leaving a clearance of $0.5 a$ to the antennas.
 
 `generate_fields` builds the mesh of one scenario, assigns the materials (`opts.includeTarget = false` gives the target region the DOI material), solves for every transmitter and saves a single `fields` struct in `results/<name>.mat`:
 
@@ -197,17 +197,17 @@ Under the first-order Born approximation and reciprocity,
 
 $$
 E_{sc}(m,n) = \frac{j\omega\varepsilon_0}{I}\int_{\mathrm{DOI}}
-E_{inc}(\mathbf r; n)\,E_{inc}(\mathbf r; m)\,\Delta\varepsilon_r(\mathbf r)\,dA .
+E_{inc}(\mathbf r; n)E_{inc}(\mathbf r; m)\Delta\varepsilon_r(\mathbf r)dA .
 $$
 
-Discretising on the DOI cells gives $\mathbf e = \mathbf K\,\mathbf x$ with
-$K_{p,c} = \frac{j\omega\varepsilon_0}{I}E_{inc}(\mathbf r_c;n_p)E_{inc}(\mathbf r_c;m_p)\,\Delta A_c$
+Discretising on the DOI cells gives $\mathbf e = \mathbf K\mathbf x$ with
+$K_{p,c} = \frac{j\omega\varepsilon_0}{I}E_{inc}(\mathbf r_c;n_p)E_{inc}(\mathbf r_c;m_p)\Delta A_c$
 and $x_c=\Delta\varepsilon_r(\mathbf r_c)$, using the reciprocal-unique pairs $n\le m$.
 With $\mathbf K=\mathbf U\mathbf S\mathbf V^H$, the $N_t$ largest singular values
 that hold a fraction `threshold` of the energy $\sum s_i^2$ are kept:
 
 $$
-\mathbf x = \mathbf V_{N_t}\,\mathbf S_{N_t}^{-1}\,\mathbf U_{N_t}^H\,\mathbf e .
+\mathbf x = \mathbf V_{N_t}\mathbf S_{N_t}^{-1}\mathbf U_{N_t}^H\mathbf e .
 $$
 
 ### Multi-frequency bi-focusing (`mfbf_imaging`)
@@ -216,7 +216,7 @@ Qualitative imaging of differential data $\Delta S(m,n,f)$:
 
 $$
 I(\mathbf r)=\frac{\sum_f I_f(\mathbf r)}{\max\left|\sum_f I_f\right|},\qquad
-I_f(\mathbf r)=\sum_{m\ne n}\Delta S(m,n,f)\,G_b(\mathbf r,\mathbf r_n)\,G_b(\mathbf r,\mathbf r_m),
+I_f(\mathbf r)=\sum_{m\ne n}\Delta S(m,n,f)G_b(\mathbf r,\mathbf r_n)G_b(\mathbf r,\mathbf r_m),
 $$
 
 with the back-propagator $G_b = -\tfrac{j}{4}H_0^{(1)}(k_b\rho)$ (phase conjugate of the
