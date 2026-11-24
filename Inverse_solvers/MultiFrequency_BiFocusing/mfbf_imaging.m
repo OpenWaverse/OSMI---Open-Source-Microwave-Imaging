@@ -34,7 +34,7 @@ function img = mfbf_imaging(DeltaS, freq_vec, antPos, eps_r_bg, opts)
 %   eps_r_bg : (real) relative permittivity of the background medium.
 %   opts     : (optional)
 %                .nPixels     pixels per axis                [100]
-%                .maskFactor  image mask radius / array radius [0.8]
+%                .maskFactor  image mask radius / array radius [0.75]
 %
 %   Output
 %   ------
@@ -45,7 +45,7 @@ function img = mfbf_imaging(DeltaS, freq_vec, antPos, eps_r_bg, opts)
 
 if nargin < 5, opts = struct(); end
 if ~isfield(opts, 'nPixels'),    opts.nPixels    = 100; end
-if ~isfield(opts, 'maskFactor'), opts.maskFactor = 0.8; end
+if ~isfield(opts, 'maskFactor'), opts.maskFactor = 0.75; end
 
 c0   = 299792458;
 Nf   = numel(freq_vec);
