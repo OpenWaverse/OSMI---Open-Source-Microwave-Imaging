@@ -53,7 +53,7 @@ OSMI---Open-Source-Microwave-Imaging/
     │   ├── data/                     meshes (.msh)
     │   └── main_generate_fields.mlx  incident, total, scattered field; operator
     └── Measured_MFBF/                MFBF on measured S-parameters
-        ├── data/
+        ├── data/                     Touchstone files (.s12p)
         └── main_imaging_MFBF.mlx
 ```
 
@@ -132,13 +132,6 @@ reference = load_fields("incident");
 
 Fields of any transmitter can be plotted with `plotField(fields, tx, 'abs')`
 
-### Figures
-
-`setup_osmi` calls `set_latex_figures`, so every figure uses the LaTeX
-interpreter (titles, labels, ticks, colour bars, legends).
-
----
-
 ## Conventions and notation
 
 | Item | Convention |
@@ -193,7 +186,7 @@ To avoid the *inverse crime*, simulate the operator and the data on different me
 
 ### Born approximation + TSVD (`born_tsvd`)
 
-Under the first-order Born approximation and reciprocity,
+Under the first-order Born approximation [1] and reciprocity,
 
 $$
 E_{sc}(m,n) = \frac{j\omega\varepsilon_0}{I}\int_{\mathrm{DOI}}
@@ -203,7 +196,7 @@ $$
 Discretising on the DOI cells gives $\mathbf e = \mathbf K\mathbf x$ with
 $K_{p,c} = \frac{j\omega\varepsilon_0}{I}E_{inc}(\mathbf r_c;n_p)E_{inc}(\mathbf r_c;m_p)\Delta A_c$
 and $x_c=\Delta\varepsilon_r(\mathbf r_c)$, using the reciprocal-unique pairs $n\le m$.
-With $\mathbf K=\mathbf U\mathbf S\mathbf V^H$, the $N_t$ largest singular values
+With $\mathbf K=\mathbf U\mathbf S\mathbf V^H$ (truncated SVD [2]), the $N_t$ largest singular values
 that hold a fraction `threshold` of the energy $\sum s_i^2$ are kept:
 
 $$
@@ -216,13 +209,23 @@ Qualitative imaging of differential data $\Delta S(m,n,f)$:
 
 $$
 I(\mathbf r)=\frac{\sum_f I_f(\mathbf r)}{\max\left|\sum_f I_f\right|},\qquad
-I_f(\mathbf r)=\sum_{m\ne n}\Delta S(m,n,f)G_b(\mathbf r,\mathbf r_n)G_b(\mathbf r,\mathbf r_m),
+I_f(\mathbf r)=\sum_{m,n}\Delta S(m,n,f)G_b(\mathbf r,\mathbf r_n)G_b(\mathbf r,\mathbf r_m),
 $$
 
 with the back-propagator $G_b = -\tfrac{j}{4}H_0^{(1)}(k_b\rho)$ (phase conjugate of the
 outgoing Green's function for $e^{+j\omega t}$). The frequencies are summed coherently and
 the image is complex: $|I|$ locates the target, while the real and imaginary parts give the
-sign of the contrast only if the phase of the data is calibrated.
+sign of the contrast only if the phase of the data is calibrated. All the antenna pairs are
+used, including the monostatic terms ($m=n$). The method follows [3, 4].
+
+`Examples/Measured_MFBF` reads the measured S-parameters from Touchstone files (`.s12p`, 12 ports),
+one per state, with `sparameters` (RF Toolbox):
+
+```matlab
+S        = sparameters("meas_MT_24.s12p");
+Sm       = S.Parameters;     % Nant x Nant x Nf
+freq_vec = S.Frequencies;    % Hz
+```
 
 ---
 
@@ -230,7 +233,17 @@ sign of the contrast only if the phase of the data is calibrated.
 
 - MATLAB R2023b or later
 - `fem2d.p` is distributed as compiled MATLAB P-code
-- Partial Differential Equation Toolbox (geometry and mesh generation)
+- Partial Differential Equation Toolbox
+- RF Toolbox
+
+---
+
+## References
+
+1. N. K. Nikolova, *Introduction to Microwave Imaging*, Cambridge University Press, 2017. [doi:10.1017/9781316084267](https://doi.org/10.1017/9781316084267)
+2. M. Bertero, P. Boccacci and C. De Mol, *Introduction to Inverse Problems in Imaging*, 2nd ed., CRC Press, 2021. [doi:10.1201/9781003032755](https://doi.org/10.1201/9781003032755)
+3. L. Jofre, A. Broquetas, J. Romeu, S. Blanch, A. P. Toda, X. Fabregas and A. Cardama, "UWB Tomographic Radar Imaging of Penetrable and Impenetrable Objects," *Proceedings of the IEEE*, vol. 97, no. 2, pp. 451-464, 2009. [doi:10.1109/JPROC.2008.2008854](https://doi.org/10.1109/JPROC.2008.2008854)
+4. L. Jofre et al., "UWB Short-Range Bifocusing Tomographic Imaging," *IEEE Transactions on Instrumentation and Measurement*, vol. 57, no. 11, pp. 2414-2420, 2008. [doi:10.1109/TIM.2008.926382](https://doi.org/10.1109/TIM.2008.926382)
 
 ---
 
