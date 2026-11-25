@@ -9,7 +9,7 @@ function img = mfbf_imaging(DeltaS, freq_vec, antPos, eps_r_bg, opts)
 %   every pixel r of a Cartesian grid by back-propagating from both the
 %   transmitter n and the receiver m:
 %
-%       I_f(r) = sum_{m ~= n}  DeltaS(m,n,f) * Gb(r, r_n) * Gb(r, r_m)
+%       I_f(r) = sum_{m,n}  DeltaS(m,n,f) * Gb(r, r_n) * Gb(r, r_m)
 %
 %   with the back-propagator  Gb(r, r') = -(j/4) * H0^(1)(k_b |r - r'|),
 %   k_b = 2*pi*f*sqrt(eps_r_bg)/c0. For exp(+j*omega*t) the outgoing 2-D
@@ -24,7 +24,7 @@ function img = mfbf_imaging(DeltaS, freq_vec, antPos, eps_r_bg, opts)
 %   |I| locates the target; Re{I} and Im{I} keep the phase of the data. They
 %   give the sign of the contrast only if the phase of the data is calibrated.
 %
-%   Monostatic terms (m = n) are discarded (antenna reflection dominated).
+%   All the pairs are used, monostatic terms (m = n, main diagonal) included.
 %
 %   Inputs
 %   ------
@@ -42,6 +42,15 @@ function img = mfbf_imaging(DeltaS, freq_vec, antPos, eps_r_bg, opts)
 %   img.I         : nPixels-by-nPixels complex image with max |I| = 1
 %                   inside the mask, NaN outside the circular mask (rows = y, cols = x)
 %   img.I_raw     : unmasked, not normalised (complex) image
+%
+%   References
+%   ----------
+%   [1] L. Jofre et al., "UWB Tomographic Radar Imaging of Penetrable and
+%       Impenetrable Objects," Proc. IEEE, vol. 97, no. 2, pp. 451-464, 2009,
+%       doi: 10.1109/JPROC.2008.2008854.
+%   [2] L. Jofre et al., "UWB Short-Range Bifocusing Tomographic Imaging,"
+%       IEEE Trans. Instrum. Meas., vol. 57, no. 11, pp. 2414-2420, 2008,
+%       doi: 10.1109/TIM.2008.926382.
 
 if nargin < 5, opts = struct(); end
 if ~isfield(opts, 'nPixels'),    opts.nPixels    = 100; end
