@@ -49,6 +49,13 @@ function rec = born_tsvd(E_sc, E_inc_doi, dA, freq, current, opts)
 %   rec.K         : data operator.
 %
 %   See also PLOT_SVD_ANALYSIS, PLOTCONTRAST
+%
+%   References
+%   ----------
+%   [1] N. K. Nikolova, Introduction to Microwave Imaging, Cambridge University
+%       Press, 2017, doi: 10.1017/9781316084267.
+%   [2] M. Bertero, P. Boccacci and C. De Mol, Introduction to Inverse Problems
+%       in Imaging, 2nd ed., CRC Press, 2021, doi: 10.1201/9781003032755.
 
 if nargin < 6, opts = struct(); end
 if ~isfield(opts, 'threshold'), opts.threshold = 0.9999; end
