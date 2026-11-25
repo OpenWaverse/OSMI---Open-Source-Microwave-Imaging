@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use OSMI, please cite it as below."
+type: software
+title: "OSMI: Open-Source Microwave Imaging"
+version: "1.1.0"
+date-released: 2026-11-25
+authors:
+  - given-names: "A. Ramiro"
+    family-names: "Masaquiza-Caiza"
+  - given-names: "David O."
+    family-names: "Rodriguez-Duarte"
+doi: 10.5281/zenodo.24523632
+repository-code: "https://github.com/OpenWaverse/OSMI---Open-Source-Microwave-Imaging"
+license: MIT
+keywords:
+  - microwave imaging
+  - finite element method
+  - inverse problems
+  - MATLAB
